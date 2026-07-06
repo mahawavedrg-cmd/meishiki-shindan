@@ -102,53 +102,88 @@ const JUUNIUN_TABLE = {
     '癸': { '卯': '長生', '寅': '沐浴', '丑': '冠帯', '子': '建禄', '亥': '帝旺', '戌': '衰', '酉': '病', '申': '死', '未': '墓', '午': '絶', '巳': '胎', '辰': '養' }
 };
 
+/* =========================================================================
+ * 二十四節気（節入り）の天文計算
+ * -------------------------------------------------------------------------
+ * 旧実装は「1900年基準の簡易近似式」で、1950〜2100年の68%(1,232/1,812点)が
+ * ±1日ズレていた（立春は151年中93年で誤り＝年柱を誤判定）。
+ * → Meeusの太陽視黄経(Ch.25 apparent)＋ΔT(Espenak-Meeus)で節入りの瞬時を
+ *   算出し、JSTの暦日を返す方式に置換。国立天文台(NAOJ)暦要項の実測と
+ *   2025-2026の全24節で日付一致（時刻誤差±14分）を検証済み。
+ *   検証ログ: 99_試運転_龍の日柱×更年期/28_命式ツール_計算検証ログ_長期運用QA.md
+ * ローカルタイムゾーンに一切依存しない（整数JD＋固定+9時間）。
+ * ========================================================================= */
+
+// グレゴリオ暦→ユリウス通日（Fliegel。正午基準の整数JDN）
+function _julianDayNum(Y, M, D) {
+    const a = Math.floor((14 - M) / 12);
+    const y = Y + 4800 - a;
+    const m = M + 12 * a - 3;
+    return D + Math.floor((153 * m + 2) / 5) + 365 * y
+        + Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400) - 32045;
+}
+// JDN→グレゴリオ暦
+function _fromJDN(J) {
+    const a = J + 32044;
+    const b = Math.floor((4 * a + 3) / 146097);
+    const c = a - Math.floor(146097 * b / 4);
+    const d = Math.floor((4 * c + 3) / 1461);
+    const e = c - Math.floor(1461 * d / 4);
+    const m = Math.floor((5 * e + 2) / 153);
+    return {
+        year: 100 * b + d - 4800 + Math.floor(m / 10),
+        month: m + 3 - 12 * Math.floor(m / 10),
+        day: e - Math.floor((153 * m + 2) / 5) + 1
+    };
+}
+// ΔT（TT-UT, 秒）Espenak & Meeus 2006
+function _deltaT(year, month) {
+    const y = year + (month - 0.5) / 12;
+    let t, dt;
+    if (year < 1920) { t = y - 1900; dt = -2.79 + 1.494119 * t - 0.0598939 * t * t + 0.0061966 * t ** 3 - 0.000197 * t ** 4; }
+    else if (year < 1941) { t = y - 1920; dt = 21.20 + 0.84493 * t - 0.076100 * t * t + 0.0020936 * t ** 3; }
+    else if (year < 1961) { t = y - 1950; dt = 29.07 + 0.407 * t - t * t / 233 + t ** 3 / 2547; }
+    else if (year < 1986) { t = y - 1975; dt = 45.45 + 1.067 * t - t * t / 260 - t ** 3 / 718; }
+    else if (year < 2005) { t = y - 2000; dt = 63.86 + 0.3345 * t - 0.060374 * t * t + 0.0017275 * t ** 3 + 0.000651814 * t ** 4 + 0.00002373599 * t ** 5; }
+    else if (year < 2050) { t = y - 2000; dt = 62.92 + 0.32217 * t + 0.005589 * t * t; }
+    else { dt = -20 + 32 * ((y - 1820) / 100) ** 2 - 0.5628 * (2150 - y); }
+    return dt;
+}
+// 太陽の視黄経（度, apparent, TT）Meeus Ch.25 低精度（±0.01°≒15分）
+function _sunLongitude(jde) {
+    const T = (jde - 2451545.0) / 36525.0;
+    const L0 = 280.46646 + 36000.76983 * T + 0.0003032 * T * T;
+    const M = 357.52911 + 35999.05029 * T - 0.0001537 * T * T;
+    const Mr = M * Math.PI / 180;
+    const C = (1.914602 - 0.004817 * T - 0.000014 * T * T) * Math.sin(Mr)
+        + (0.019993 - 0.000101 * T) * Math.sin(2 * Mr)
+        + 0.000289 * Math.sin(3 * Mr);
+    const Omega = 125.04 - 1934.136 * T;
+    const lambda = (L0 + C) - 0.00569 - 0.00478 * Math.sin(Omega * Math.PI / 180);
+    return ((lambda % 360) + 360) % 360;
+}
+// 各月の「節」に対応する太陽黄経
+const _SETSU_LONGITUDE = { 1: 285, 2: 315, 3: 345, 4: 15, 5: 45, 6: 75, 7: 105, 8: 135, 9: 165, 10: 195, 11: 225, 12: 255 };
+
 /**
- * 二十四節気（節入り日）の簡易天文学的計算
- * 四柱推命の月境界を算出するために使用
- * @param {number} year 
+ * 指定した年月の「節入り」のJST暦日を返す（月柱・年柱の境界に使用）
+ * @param {number} year
  * @param {number} month (1-12)
- * @returns {number} 節入り日 (Day)
+ * @returns {number} 節入り日 (JSTの日付・Day)
  */
 function getSetsuiriDay(year, month) {
-    // 各月の節気基準定数
-    // 1月: 小寒, 2月: 立春, 3月: 啓蟄, 4月: 清明, 5月: 立夏, 6月: 芒種
-    // 7月: 小暑, 8月: 立秋, 9月: 白露, 10月: 寒露, 11月: 立冬, 12月: 大雪
-    const setsuiriBase = [
-        5.4055,  // 1月 小寒
-        4.2856,  // 2月 立春
-        5.6937,  // 3月 啓蟄
-        4.845,   // 4月 清明
-        5.792,   // 5月 立夏
-        5.952,   // 6月 芒種
-        7.172,   // 7月 小暑
-        7.812,   // 8月 立秋
-        7.942,   // 9月 白露
-        8.382,   // 10月 寒露
-        7.532,   // 11月 立冬
-        7.252    // 12月 大雪
-    ];
-    
-    const idx = month - 1;
-    const base = setsuiriBase[idx];
-    
-    // 簡易近似式による太陽位置からの計算
-    const yDiff = year - 1900;
-    const leapAdjustment = Math.floor(yDiff / 4);
-    
-    // 節入りのおよその日付
-    let day = Math.floor(base + 0.242194 * yDiff - leapAdjustment);
-    
-    // 例外的な年次補正 (2000年代以降のズレ補正)
-    if (year >= 2000) {
-        // 近似精度の微調整
-        if (month === 2) {
-            // 2000年以降の立春は基本的に2月3日か4日
-            const val = 4.8693 + 0.24271 * (year - 2000) - Math.floor((year - 2000) / 4);
-            day = Math.floor(val);
-        }
+    const targetLong = _SETSU_LONGITUDE[month];
+    let jdUT = _julianDayNum(year, month, 6); // その月の6日正午を初期値
+    const dTdays = _deltaT(year, month) / 86400.0;
+    for (let i = 0; i < 10; i++) {
+        const lam = _sunLongitude(jdUT + dTdays); // TT = UT + ΔT
+        const diff = ((lam - targetLong + 180) % 360 + 360) % 360 - 180;
+        jdUT -= diff / 0.98565; // 太陽は約0.9856°/日
+        if (Math.abs(diff) < 1e-7) break;
     }
-    
-    return day;
+    // 瞬時をJSTの暦日へ（+9時間・固定。ローカルTZに依存しない）
+    const jdnJST = Math.floor(jdUT + 9 / 24 + 0.5);
+    return _fromJDN(jdnJST).day;
 }
 
 /**
@@ -285,10 +320,9 @@ function calculateMeishiki(year, month, day, hour = null) {
 
     // 4. 日柱の干支計算
     // 基準: 1900年1月1日は 「甲戌」 (甲=0, 戌=10)
-    const baseDate = new Date(1900, 0, 1);
-    const targetDate = new Date(year, month - 1, day);
-    const diffTime = targetDate.getTime() - baseDate.getTime();
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    // 整数ユリウス通日の差で算出（new Dateのローカル時刻差分方式だと、
+    // 海外タイムゾーンや旧サマータイム(1948-51)で日柱が1日ズレるため置換）
+    const diffDays = _julianDayNum(year, month, day) - _julianDayNum(1900, 1, 1);
 
     const nikkanKanIdx = (0 + (diffDays % 10) + 10) % 10;
     const nikkanShiIdx = (10 + (diffDays % 12) + 12) % 12;

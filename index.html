@@ -1197,23 +1197,61 @@
             '癸': { '卯': '長生', '寅': '沐浴', '丑': '冠帯', '子': '建禄', '亥': '帝旺', '戌': '衰', '酉': '病', '申': '死', '未': '墓', '午': '絶', '巳': '胎', '辰': '養' }
         };
 
+        // === 二十四節気（節入り）＝天文計算（Meeus太陽視黄経＋ΔT） ===
+        // 旧・簡易近似式は1950-2100の68%が±1日ズレ（立春は93年分誤り→年柱誤判定）。
+        // NAOJ暦要項の実測と2025-2026全24節で日付一致(±14分)を検証済。
+        // ローカルTZに非依存（整数JD＋固定+9時間）。検証ログ=別紙[28]。
+        function _julianDayNum(Y, M, D) {
+            const a = Math.floor((14 - M) / 12);
+            const y = Y + 4800 - a;
+            const m = M + 12 * a - 3;
+            return D + Math.floor((153 * m + 2) / 5) + 365 * y
+                + Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400) - 32045;
+        }
+        function _fromJDN(J) {
+            const a = J + 32044;
+            const b = Math.floor((4 * a + 3) / 146097);
+            const c = a - Math.floor(146097 * b / 4);
+            const d = Math.floor((4 * c + 3) / 1461);
+            const e = c - Math.floor(1461 * d / 4);
+            const m = Math.floor((5 * e + 2) / 153);
+            return { year: 100 * b + d - 4800 + Math.floor(m / 10), month: m + 3 - 12 * Math.floor(m / 10), day: e - Math.floor((153 * m + 2) / 5) + 1 };
+        }
+        function _deltaT(year, month) {
+            const y = year + (month - 0.5) / 12;
+            let t, dt;
+            if (year < 1920) { t = y - 1900; dt = -2.79 + 1.494119 * t - 0.0598939 * t * t + 0.0061966 * t ** 3 - 0.000197 * t ** 4; }
+            else if (year < 1941) { t = y - 1920; dt = 21.20 + 0.84493 * t - 0.076100 * t * t + 0.0020936 * t ** 3; }
+            else if (year < 1961) { t = y - 1950; dt = 29.07 + 0.407 * t - t * t / 233 + t ** 3 / 2547; }
+            else if (year < 1986) { t = y - 1975; dt = 45.45 + 1.067 * t - t * t / 260 - t ** 3 / 718; }
+            else if (year < 2005) { t = y - 2000; dt = 63.86 + 0.3345 * t - 0.060374 * t * t + 0.0017275 * t ** 3 + 0.000651814 * t ** 4 + 0.00002373599 * t ** 5; }
+            else if (year < 2050) { t = y - 2000; dt = 62.92 + 0.32217 * t + 0.005589 * t * t; }
+            else { dt = -20 + 32 * ((y - 1820) / 100) ** 2 - 0.5628 * (2150 - y); }
+            return dt;
+        }
+        function _sunLongitude(jde) {
+            const T = (jde - 2451545.0) / 36525.0;
+            const L0 = 280.46646 + 36000.76983 * T + 0.0003032 * T * T;
+            const M = 357.52911 + 35999.05029 * T - 0.0001537 * T * T;
+            const Mr = M * Math.PI / 180;
+            const C = (1.914602 - 0.004817 * T - 0.000014 * T * T) * Math.sin(Mr)
+                + (0.019993 - 0.000101 * T) * Math.sin(2 * Mr) + 0.000289 * Math.sin(3 * Mr);
+            const Omega = 125.04 - 1934.136 * T;
+            const lambda = (L0 + C) - 0.00569 - 0.00478 * Math.sin(Omega * Math.PI / 180);
+            return ((lambda % 360) + 360) % 360;
+        }
+        const _SETSU_LONGITUDE = { 1: 285, 2: 315, 3: 345, 4: 15, 5: 45, 6: 75, 7: 105, 8: 135, 9: 165, 10: 195, 11: 225, 12: 255 };
         function getSetsuiriDay(year, month) {
-            const setsuiriBase = [
-                5.4055, 4.2856, 5.6937, 4.845, 5.792, 5.952,
-                7.172, 7.812, 7.942, 8.382, 7.532, 7.252
-            ];
-            const idx = month - 1;
-            const base = setsuiriBase[idx];
-            const yDiff = year - 1900;
-            const leapAdjustment = Math.floor(yDiff / 4);
-            let day = Math.floor(base + 0.242194 * yDiff - leapAdjustment);
-            if (year >= 2000) {
-                if (month === 2) {
-                    const val = 4.8693 + 0.24271 * (year - 2000) - Math.floor((year - 2000) / 4);
-                    day = Math.floor(val);
-                }
+            const targetLong = _SETSU_LONGITUDE[month];
+            let jdUT = _julianDayNum(year, month, 6);
+            const dTdays = _deltaT(year, month) / 86400.0;
+            for (let i = 0; i < 10; i++) {
+                const lam = _sunLongitude(jdUT + dTdays);
+                const diff = ((lam - targetLong + 180) % 360 + 360) % 360 - 180;
+                jdUT -= diff / 0.98565;
+                if (Math.abs(diff) < 1e-7) break;
             }
-            return day;
+            return _fromJDN(Math.floor(jdUT + 9 / 24 + 0.5)).day;
         }
 
         function getTuuhensei(nikkan, targetKan) {
@@ -1289,10 +1327,8 @@
             const monthShift = (getsushiShiIdx - 2 + 12) % 12;
             const getsushiKanIdx = (startKanIdx + monthShift) % 10;
             const getsushiKan = JIKKAN[getsushiKanIdx];
-            const baseDate = new Date(1900, 0, 1);
-            const targetDate = new Date(year, month - 1, day);
-            const diffTime = targetDate.getTime() - baseDate.getTime();
-            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            // 日柱：整数ユリウス通日の差（new Dateのローカル差分は海外TZ/旧サマータイムで1日ズレるため置換）
+            const diffDays = _julianDayNum(year, month, day) - _julianDayNum(1900, 1, 1);
             const nikkanKanIdx = (0 + (diffDays % 10) + 10) % 10;
             const nikkanShiIdx = (10 + (diffDays % 12) + 12) % 12;
             const nikkanKan = JIKKAN[nikkanKanIdx];
