@@ -6,25 +6,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
     <title>あなたの日主×更年期タイプ診断｜龍の鑑定師が読む命式</title>
     <meta name="description" content="生年月日を入れるだけ。あなたの日主（本質の星）と更年期タイプが自動でわかります。体を整える食材・症状の出方・整え方を無料でお届け。">
-    <meta name="theme-color" content="#030712">
+    <meta name="theme-color" content="#eef4f1">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <style>
         :root {
-            --bg-deep: #030712;
-            --bg-surface: rgba(10, 15, 30, 0.75);
-            --glass-bg: rgba(255, 255, 255, 0.02);
-            --glass-bg-hover: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.06);
-            --glass-border-hover: rgba(255, 255, 255, 0.15);
-            --primary: #8b5cf6;
-            --primary-glow: rgba(139, 92, 246, 0.35);
-            --secondary: #00d2ff;
-            --secondary-glow: rgba(0, 210, 255, 0.25);
-            --gold: #f59e0b;
-            --gold-glow: rgba(245, 158, 11, 0.25);
-            --text-main: #f1f5f9;
-            --text-muted: #64748b;
+            /* ブランド：翡翠（辰=龍）×金（庚）＝庚辰。薄い翡翠ライト（27_ブランドパレット） */
+            --bg-deep: #eef4f1;
+            --bg-surface: #ffffff;
+            --glass-bg: #f6faf8;
+            --glass-bg-hover: #eef6f2;
+            --glass-border: #d7e5dd;
+            --glass-border-hover: #2f9e83;
+            --primary: #2f9e83;
+            --primary-glow: rgba(47, 158, 131, 0.28);
+            --secondary: #2b8f9a;
+            --secondary-glow: rgba(43, 143, 154, 0.20);
+            --gold: #b0862f;
+            --gold-glow: rgba(176, 134, 47, 0.22);
+            --text-main: #1e2b27;
+            --text-muted: #64796f;
         }
 
         * {
@@ -59,7 +60,7 @@
         .ambient-1 {
             width: 600px;
             height: 600px;
-            background: radial-gradient(circle, rgba(139, 92, 246, 0.4) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(47, 158, 131, 0.22) 0%, transparent 70%);
             top: -200px;
             left: -100px;
             animation: drift-1 20s infinite alternate ease-in-out;
@@ -68,7 +69,7 @@
         .ambient-2 {
             width: 500px;
             height: 500px;
-            background: radial-gradient(circle, rgba(0, 210, 255, 0.3) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(176, 134, 47, 0.16) 0%, transparent 70%);
             bottom: -150px;
             right: -100px;
             animation: drift-2 25s infinite alternate ease-in-out;
@@ -117,7 +118,7 @@
             font-size: 2rem;
             font-weight: 700;
             letter-spacing: 2px;
-            background: linear-gradient(135deg, #ffffff 40%, var(--secondary) 100%);
+            background: linear-gradient(135deg, #1f5f52 25%, var(--primary) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 10px;
@@ -138,7 +139,7 @@
             border-radius: 24px;
             padding: 30px;
             margin-bottom: 30px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 15px 35px rgba(31, 95, 82, 0.12);
         }
 
         .form-grid {
@@ -183,7 +184,7 @@
         /* 鑑定ボタン */
         .calc-btn {
             width: 100%;
-            background: linear-gradient(135deg, var(--primary), #6d28d9);
+            background: linear-gradient(135deg, var(--primary), #1f5f52);
             border: none;
             border-radius: 14px;
             color: white;
@@ -202,7 +203,7 @@
 
         .calc-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 24px rgba(139, 92, 246, 0.5);
+            box-shadow: 0 12px 24px rgba(47, 158, 131, 0.35);
         }
 
         .calc-btn:active {
@@ -327,7 +328,7 @@
             display: flex;
             flex-direction: column;
             gap: 4px;
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(31, 95, 82, 0.05);
             border-radius: 12px;
             padding: 12px 0;
         }
@@ -368,8 +369,8 @@
 
         /* 通変星 */
         .tuuhen-box {
-            background: rgba(139, 92, 246, 0.08);
-            border: 1px solid rgba(139, 92, 246, 0.15);
+            background: rgba(47, 158, 131, 0.08);
+            border: 1px solid rgba(47, 158, 131, 0.15);
             border-radius: 10px;
             padding: 10px;
             display: flex;
@@ -391,8 +392,8 @@
 
         /* 十二運星 */
         .juuniun-box {
-            background: rgba(0, 210, 255, 0.08);
-            border: 1px solid rgba(0, 210, 255, 0.15);
+            background: rgba(43, 143, 154, 0.08);
+            border: 1px solid rgba(43, 143, 154, 0.15);
             border-radius: 10px;
             padding: 10px;
             display: flex;
@@ -473,12 +474,10 @@
 
         /* 更年期タイプ診断セクション */
         .kounenki-section {
-            background: var(--bg-surface);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(139, 92, 246, 0.3);
+            background: transparent;
+            border: none;
             border-radius: 24px;
-            padding: 36px 30px;
+            padding: 8px 0;
             display: none;
             flex-direction: column;
             gap: 28px;
@@ -492,7 +491,7 @@
         .kounenki-header h2 {
             font-size: 1.4rem;
             font-weight: 700;
-            background: linear-gradient(135deg, #f59e0b, #ec4899);
+            background: linear-gradient(135deg, #b0862f, #2f9e83);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 8px;
@@ -577,8 +576,8 @@
         }
 
         .card-point {
-            background: rgba(139, 92, 246, 0.06);
-            border: 1px solid rgba(139, 92, 246, 0.15);
+            background: rgba(47, 158, 131, 0.06);
+            border: 1px solid rgba(47, 158, 131, 0.15);
             grid-column: 1 / -1;
         }
 
@@ -608,7 +607,7 @@
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            background: linear-gradient(135deg, #ec4899, #8b5cf6);
+            background: linear-gradient(135deg, #2f9e83, #1f5f52);
             color: white;
             padding: 16px 36px;
             border-radius: 50px;
@@ -672,7 +671,7 @@
             display: flex;
             flex-direction: column;
             position: relative;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+            box-shadow: 0 25px 50px -12px rgba(31, 95, 82, 0.20);
             animation: modalScaleUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
             overflow: hidden;
         }
@@ -931,7 +930,7 @@
                     <!-- 四柱カードレイアウト -->
                     <div class="pillars-container">
                         <!-- 時柱 -->
-                        <div class="pillar-card" style="--accent: #ec4899;" id="pillarTime">
+                        <div class="pillar-card" style="--accent: #b0862f;" id="pillarTime">
                             <span class="pillar-label">時柱</span>
                             <div class="ento-box">
                                 <div class="ento-item" id="timeKan">—</div>
@@ -977,7 +976,7 @@
                         </div>
 
                         <!-- 月柱 -->
-                        <div class="pillar-card" style="--accent: #00d2ff;" id="pillarMonth">
+                        <div class="pillar-card" style="--accent: #2b8f9a;" id="pillarMonth">
                             <span class="pillar-label">月柱</span>
                             <div class="ento-box">
                                 <div class="ento-item" id="monthKan">—</div>
@@ -987,20 +986,20 @@
                                 <div class="zoukan-label">蔵干</div>
                                 <div class="zoukan-val" id="monthZoukan">—</div>
                             </div>
-                            <div class="tuuhen-box" style="background: rgba(0, 210, 255, 0.08); border-color: rgba(0, 210, 255, 0.15);">
+                            <div class="tuuhen-box" style="background: rgba(43, 143, 154, 0.08); border-color: rgba(43, 143, 154, 0.15);">
                                 <span class="tuuhen-label" style="color: var(--secondary);">通変星</span>
                                 <span class="tuuhen-val" id="monthTuuhen">—</span>
                                 <span class="tuuhen-label" style="margin-top: 4px; color: var(--secondary);">蔵干通変</span>
                                 <span class="tuuhen-val" id="monthZoukanTuuhen">—</span>
                             </div>
-                            <div class="juuniun-box" style="background: rgba(0, 210, 255, 0.08); border-color: rgba(0, 210, 255, 0.15);">
+                            <div class="juuniun-box" style="background: rgba(43, 143, 154, 0.08); border-color: rgba(43, 143, 154, 0.15);">
                                 <span class="juuniun-label" style="color: var(--secondary);">十二運星</span>
                                 <span class="juuniun-val" id="monthJuuniun">—</span>
                             </div>
                         </div>
 
                         <!-- 年柱 -->
-                        <div class="pillar-card" style="--accent: #8b5cf6;" id="pillarYear">
+                        <div class="pillar-card" style="--accent: #2f9e83;" id="pillarYear">
                             <span class="pillar-label">年柱</span>
                             <div class="ento-box">
                                 <div class="ento-item" id="yearKan">—</div>
@@ -1125,11 +1124,12 @@
 
         // 五行の色（UI用のカラーコード）
         const GOGYOU_COLORS = {
-            '木': '#10b981', // 緑
-            '火': '#ef4444', // 赤
-            '土': '#f59e0b', // 黄・アンバー
-            '金': '#e2e8f0', // 白・グレー
-            '水': '#3b82f6'  // 青
+            // ブランド調和のアースカラー（彩度を抑え翡翠×金に馴染む・五行の意味は保持）
+            '木': '#3f9773', // 翡翠寄りの緑
+            '火': '#c15c4e', // 落ち着いた朱赤
+            '土': '#bf9a3c', // 黄土（オークル）
+            '金': '#b0862f', // ブランド金（庚辰の庚）
+            '水': '#3f7d94'  // 青碧（落ち着いた青）
         };
 
         // 蔵干（地支が持つ十干の本気・中気・余気の設定：一般的な配分）
@@ -1363,7 +1363,7 @@
         const KOUNENKI_DATA = {
             '木': {
                 badge: '🌿 木タイプ（甲・乙）',
-                badgeColor: 'background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3);',
+                badgeColor: 'background: rgba(63,151,115,0.15); color: #3f9773; border: 1px solid rgba(63,151,115,0.35);',
                 subtitle: '感情が体に出やすいタイプ。春の木のように上へ伸びる力が強い分、根の疲れが症状に出ます。',
                 symptoms: ['イライラ・怒りっぽくなる', '頭痛・目の疲れ・めまい', '爪がもろくなる・筋肉のこわばり', '月経不順・PMS的な感情の波'],
                 foods: ['小松菜・ほうれん草（血を補う）', '黒ゴマ・クコの実（肝を養う）', '酢・梅干し（気の巡りを整える）', 'レモン・グレープフルーツ（肝の働きを助ける）'],
@@ -1372,7 +1372,7 @@
             },
             '火': {
                 badge: '🔥 火タイプ（丙・丁）',
-                badgeColor: 'background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.3);',
+                badgeColor: 'background: rgba(193,92,78,0.15); color: #c15c4e; border: 1px solid rgba(193,92,78,0.35);',
                 subtitle: '熱と輝きを持つタイプ。エネルギーが高い分、更年期で熱が暴走しやすくなります。',
                 symptoms: ['ホットフラッシュ・顔のほてり', '動悸・息切れ・胸の圧迫感', '不眠・眠りが浅い', '多汗・発汗のコントロールが難しい'],
                 foods: ['冬瓜・スイカ（体の熱を冷ます）', 'はちみつ・蓮の実（心を落ち着かせる）', '苦瓜（ゴーヤ）・緑茶（余分な熱を取る）', 'トマト・きゅうり（体を潤す）'],
@@ -1381,7 +1381,7 @@
             },
             '土': {
                 badge: '🌍 土タイプ（戊・己）',
-                badgeColor: 'background: rgba(245,158,11,0.15); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3);',
+                badgeColor: 'background: rgba(191,154,60,0.15); color: #bf9a3c; border: 1px solid rgba(191,154,60,0.35);',
                 subtitle: '安定と包容力を持つタイプ。消化器系と思い悩む性質が更年期症状として出やすくなります。',
                 symptoms: ['体重増加・むくみ・下半身の重だるさ', '胃腸の不調・食欲のムラ', 'くよくよ考えすぎ・心配性が強くなる', 'だるさ・やる気の低下'],
                 foods: ['かぼちゃ・さつまいも・山芋（胃腸を元気にする）', '生姜・シナモン（気の巡りを整える）', '黒豆・小豆（むくみを取る）', '発酵食品（味噌・納豆・キムチ）'],
@@ -1390,7 +1390,7 @@
             },
             '金': {
                 badge: '⚔️ 金タイプ（庚・辛）',
-                badgeColor: 'background: rgba(226,232,240,0.15); color: #e2e8f0; border: 1px solid rgba(226,232,240,0.3);',
+                badgeColor: 'background: rgba(176,134,47,0.15); color: #b0862f; border: 1px solid rgba(176,134,47,0.35);',
                 subtitle: '意志の強さと美意識を持つタイプ。乾燥と悲しみの感情が更年期に出やすくなります。',
                 symptoms: ['肌・喉・鼻の乾燥', '咳・呼吸器の不調・声がかれる', '皮膚のかゆみ・アレルギー症状', '悲しみ・寂しさ・感傷的になる'],
                 foods: ['梨・白きくらげ（肺と皮膚を潤す）', '白ごま・山芋・蓮根（乾燥を内側から補う）', '梅干し・酢（肺の引き締めを助ける）', 'はちみつ（喉・気管支を守る）'],
@@ -1399,7 +1399,7 @@
             },
             '水': {
                 badge: '🌊 水タイプ（壬・癸）',
-                badgeColor: 'background: rgba(59,130,246,0.15); color: #3b82f6; border: 1px solid rgba(59,130,246,0.3);',
+                badgeColor: 'background: rgba(63,125,148,0.15); color: #3f7d94; border: 1px solid rgba(63,125,148,0.35);',
                 subtitle: '深い知恵と流れを持つタイプ。腎のエネルギーが更年期に消耗しやすく、冷えと骨に症状が出やすいです。',
                 symptoms: ['腰痛・膝の痛み・骨密度の低下', '耳鳴り・聴力の変化', '頻尿・夜中に何度もトイレ', '冷え（特に下半身）・疲れが抜けない'],
                 foods: ['黒豆・黒ゴマ・わかめ（腎を補う）', '牡蠣・あさり・小魚（ミネラルで骨を守る）', 'クルミ・栗（腎の陽気を補う）', '昆布・ひじき（ミネラル補給）'],
