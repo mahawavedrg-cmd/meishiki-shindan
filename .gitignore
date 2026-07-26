@@ -1,0 +1,10 @@
+# === ソース保護（絶対）===
+# 命式の計算ロジック（GAS）は公開リポジトリ/GitHub Pagesに含めない。
+# 実行の正典は Apps Script 側。ここのファイルは手元の参照コピーのみ。
+gas/
+
+# Firebase Hosting設定（GitHub Pages運用では不要・公開しない）
+firebase.json
+
+# ローカル作業物
+node_modules/
